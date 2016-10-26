@@ -1,0 +1,12 @@
+(page "index.html"
+      (:require [cljs.ui :refer [width height]]))
+
+(html
+  (head
+    (link :href "app.css" :rel "stylesheet"))
+  (body
+    (h1 "Hi, I'm Mike!")
+    (p "I'm a silly guy who likes to make things on the internet.")
+    (p "The current width of the screen is " (width) (height))
+    (p :align "center"
+       "another paragraph")))
