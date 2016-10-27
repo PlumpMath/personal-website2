@@ -1,12 +1,34 @@
 (page "index.html"
-      (:require [cljs.ui :refer [width height]]))
+      (:require [cljs.ui :refer [width
+                                 height
+                                 equally-among-elem
+                                 basic-flex-row-style
+                                 basic-style]]))
 
+;;Look for width on page-load and make layout based on that.  Will handle most
+;;usage cases, mobile or desktop.
+(defn flex-equal-row [& elem]
+  (if (> (width) 600)
+        (map #(div :css {:width
+                (equally-among-elem elem)} %) elem)
+        (map #(div :css {:width
+                     (str (width))} %) elem)))
+
+;;(defelem my-div [attributes children] (div attributes children))
 (html
-  (head
-    (link :href "app.css" :rel "stylesheet"))
-  (body
-    (h1 "Hi, I'm Mike!")
-    (p "I'm a silly guy who likes to make things on the internet.")
-    (p "The current width of the screen is " (width) (height))
-    (p :align "center"
-       "another paragraph")))
+  (head)
+  (body :css basic-style
+    (div :id "top-bar" :css (conj basic-flex-row-style
+                                    {:background "rgb(80, 80, 80)"
+                                     :min-height "50px"
+                                     :padding "10px"
+                                     :align-items "flex-start"})
+      (flex-equal-row
+        (h1 "Hi, I'm Mike!")
+        (div :css {:text-align "right"} "Contact info")))
+
+    (div :id "content" :css (conj basic-flex-row-style
+                                    {:background "rgb(255, 255, 255)"
+                                     :min-height "130px"
+                                     :padding "2px"})
+      (flex-equal-row "current-work" "code" "animation" "art"))))
