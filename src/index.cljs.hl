@@ -1,34 +1,38 @@
 (page "index.html"
-      (:require [cljs.ui :refer [width
-                                 height
-                                 equally-among-elem
-                                 basic-flex-row-style
-                                 basic-style]]))
+      (:require [cljs.ui :refer [equally-among-elem
+                                 basic-flex-row-style]]
+                [javelin.core :refer [cell] :refer-macros [cell= defc]]))
 
-;;Look for width on page-load and make layout based on that.  Will handle most
-;;usage cases, mobile or desktop.
-(defn flex-equal-row [& elem]
-  (if (> (width) 600)
-        (map #(div :css {:width
-                (equally-among-elem elem)} %) elem)
-        (map #(div :css {:width
-                     (str (width))} %) elem)))
+(def wide? (cell (> (.-innerWidth js/window) 600)))
 
-;;(defelem my-div [attributes children] (div attributes children))
+;;Start an update loop to listen for changes to window width.  Return a boolean
+;;for whether to get into 'wide' mode.
+(.setInterval js/window #(reset! wide?
+                        (> (.-innerWidth js/window) 600) 1000))
+
+(defelem flex-equal-row [attrs elem]
+  (for [e elem]
+    (div :css (cell= (if wide? (conj attrs {:width (equally-among-elem elem)})
+                               (conj attrs {:width "100%"
+                                            :position "float"}))) e)))
+
 (html
   (head)
-  (body :css basic-style
-    (div :id "top-bar" :css (conj basic-flex-row-style
-                                    {:background "rgb(80, 80, 80)"
-                                     :min-height "50px"
-                                     :padding "10px"
-                                     :align-items "flex-start"})
-      (flex-equal-row
-        (h1 "Hi, I'm Mike!")
-        (div :css {:text-align "right"} "Contact info")))
+  (body
+    (div :id "top-bar" :css (conj {:background "rgb(80, 80, 80)"
+                                   :min-height "50px"}
+                                  basic-flex-row-style)
 
-    (div :id "content" :css (conj basic-flex-row-style
-                                    {:background "rgb(255, 255, 255)"
-                                     :min-height "130px"
-                                     :padding "2px"})
-      (flex-equal-row "current-work" "code" "animation" "art"))))
+      (flex-equal-row basic-flex-row-style
+        (h1 :css {:text-align "left"} "Hi, I'm Mike!")
+        (h2 :css {:text-align "right"
+                  :float "right"} "Contact info" "another thing"))
+
+    (div :id "content" :css (conj {:background "rgb(255, 255, 255)"
+                                   :min-height "130px"}
+                                  basic-flex-row-style)
+      (flex-equal-row basic-flex-row-style
+                      (h5 :css {:position "absolute"} "current work")
+                      (h5 "older work")
+                      (h5 "bio")
+                      (h5 "whatever"))))))
