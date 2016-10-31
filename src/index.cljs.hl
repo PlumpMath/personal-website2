@@ -1,43 +1,50 @@
 (page "index.html"
-      (:require [cljs.ui :refer [equally-among-elem
-                                 responsive-row
+      (:require [cljs.ui :refer [divide-equally-among
+                                 row
                                  box]]
                 [javelin.core :refer [cell] :refer-macros [cell= defc]]))
-
-(def wide? (cell (> (.-innerWidth js/window) 600)))
-(def margin 5)
+(def wide 450)
+(defc wide? (> (.-innerWidth js/window) wide))
 
 ;;Start an update loop to listen for changes to window width.  Return a boolean
 ;;for whether to get into 'wide' mode.
 (.setInterval js/window #(reset! wide?
-                        (> (.-innerWidth js/window) 600) 1000))
+                        (> (.-innerWidth js/window) wide) 1000))
 
-(defelem draw-equal-row [attrs elem]
+(defelem responsive-row [attrs elem]
   (for [e elem]
-    (div :css (cell= (if wide?
-                       (conj attrs box {:width (equally-among-elem elem)})
-                       (conj attrs box {:width "100%"}))) e)))
+    (div :css
+      (cell= (if wide?
+               (conj attrs box {:width (divide-equally-among elem)})
+               (conj attrs box {:width "100%"}))) e)))
+
+(defelem row-box [attrs elem]
+  (for [e elem]
+    (div :css (conj attrs {:margin "0px"
+                           :min-height "80px"})
+         :class "box"
+          (div :css {:margin "inherit"
+                     :padding "10px"
+                     :min-height "inherit"} e))))
 
 (html
-  (head)
-  (body
+  (head
+   (link :href "app.css" :rel "stylesheet"))
+  (body :css  {:width "100%"
+               :margin "auto"}
     (div :id "top-bar" :css (conj {:background "rgb(80, 80, 80)"
                                    :min-height "50px"}
-                                  responsive-row)
+                                  row)
 
-      (draw-equal-row responsive-row
+      (responsive-row row
         (h1 :css {:text-align "left"
                   :margin "10px"} "Hi, I'm Mike!")
-        (h2 :css {:text-align "left"
-                  :margin "10px"} "This is my website!")
-        (h3 :css {:text-align "right"
-                  :margin "10px"} "Contact info"))
+        (h4 :css {:text-align "right"
+                  :margin "10px"
+                  :height "100%"} "Contact info")))
 
     (div :id "content" :css (conj {:background "rgb(255, 255, 255)"
-                                   :min-height "130px"}
-                                  responsive-row)
-      (draw-equal-row responsive-row
-                      (h5 "current work")
-                      (h5 "older work")
-                      (h5 "bio")
-                      (h5 "whatever"))))))
+                                   :min-height "150"}
+                                  row)
+      (responsive-row row
+          (row-box "current work" "past work" "resume" "code")))))
