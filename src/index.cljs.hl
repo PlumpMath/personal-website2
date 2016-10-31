@@ -1,38 +1,43 @@
 (page "index.html"
       (:require [cljs.ui :refer [equally-among-elem
-                                 basic-flex-row-style]]
+                                 responsive-row
+                                 box]]
                 [javelin.core :refer [cell] :refer-macros [cell= defc]]))
 
 (def wide? (cell (> (.-innerWidth js/window) 600)))
+(def margin 5)
 
 ;;Start an update loop to listen for changes to window width.  Return a boolean
 ;;for whether to get into 'wide' mode.
 (.setInterval js/window #(reset! wide?
                         (> (.-innerWidth js/window) 600) 1000))
 
-(defelem flex-equal-row [attrs elem]
+(defelem draw-equal-row [attrs elem]
   (for [e elem]
-    (div :css (cell= (if wide? (conj attrs {:width (equally-among-elem elem)})
-                               (conj attrs {:width "100%"
-                                            :position "float"}))) e)))
+    (div :css (cell= (if wide?
+                       (conj attrs box {:width (equally-among-elem elem)})
+                       (conj attrs box {:width "100%"}))) e)))
 
 (html
   (head)
   (body
     (div :id "top-bar" :css (conj {:background "rgb(80, 80, 80)"
                                    :min-height "50px"}
-                                  basic-flex-row-style)
+                                  responsive-row)
 
-      (flex-equal-row basic-flex-row-style
-        (h1 :css {:text-align "left"} "Hi, I'm Mike!")
-        (h2 :css {:text-align "right"
-                  :float "right"} "Contact info" "another thing"))
+      (draw-equal-row responsive-row
+        (h1 :css {:text-align "left"
+                  :margin "10px"} "Hi, I'm Mike!")
+        (h2 :css {:text-align "left"
+                  :margin "10px"} "This is my website!")
+        (h3 :css {:text-align "right"
+                  :margin "10px"} "Contact info"))
 
     (div :id "content" :css (conj {:background "rgb(255, 255, 255)"
                                    :min-height "130px"}
-                                  basic-flex-row-style)
-      (flex-equal-row basic-flex-row-style
-                      (h5 :css {:position "absolute"} "current work")
+                                  responsive-row)
+      (draw-equal-row responsive-row
+                      (h5 "current work")
                       (h5 "older work")
                       (h5 "bio")
                       (h5 "whatever"))))))
